@@ -202,8 +202,14 @@ public class ControlDeStockFrame extends JFrame {
         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                     Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
+                    
+                    int cantidadEliminada;
 
-                    this.productoController.eliminar(id);
+                    try {
+                    	cantidadEliminada = this.productoController.eliminar(id);
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
 
                     modelo.removeRow(tabla.getSelectedRow());
 
