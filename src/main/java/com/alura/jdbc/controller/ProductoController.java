@@ -2,6 +2,7 @@ package com.alura.jdbc.controller;
 
 import java.sql.Statement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,32 +17,36 @@ public class ProductoController {
 	public int modificar(String nombre, String descripcion, Integer id, Integer cantidad) throws SQLException {
 				
 		Connection con = new ConnectionFactory().recuperaConexion();
-		Statement statement = con.createStatement();
-		statement.execute("UPDATE PRODUCTO SET "
-				+ " NOMBRE = '"+nombre+"', "
-				+ " DESCRIPCION = '"+descripcion+"',"
-				+ " CANTIDAD = "+cantidad
-				+ " WHERE ID = "+id+";");
+		PreparedStatement statement = con.prepareStatement("UPDATE PRODUCTO SET "
+				+ " NOMBRE = ?, "
+				+ " DESCRIPCION = ?,"
+				+ " CANTIDAD = ?"
+				+ " WHERE ID = ?;");
+		statement.setString(1, nombre);
+		statement.setString(2, descripcion);
+		statement.setInt(3, cantidad );
+		statement.setInt(4, id );
 		
+		statement.execute();
 		
 		return statement.getUpdateCount();
 	}
 
 	public int eliminar(Integer id )throws SQLException {
 		Connection con = new ConnectionFactory().recuperaConexion();		
-		Statement statement = con.createStatement();		
-		statement.execute("DELETE FROM PRODUCTO WHERE ID ="+id);
-		con.close();
+		PreparedStatement statement = con.prepareStatement("DELETE FROM PRODUCTO WHERE ID = ?");		
+		statement.setInt(1, id);
+		statement.execute();
+		
 		return statement.getUpdateCount();
+		
 	}
 
 	public List<Map<String, String>> listar() throws SQLException {
 		
-		Connection con = new ConnectionFactory().recuperaConexion();
-		
-		Statement statement = con.createStatement();
-		
-		statement.execute("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO");
+		Connection con = new ConnectionFactory().recuperaConexion();		
+		PreparedStatement statement = con.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO");		
+		statement.execute();
 		
 		ResultSet resultSet = statement.getResultSet();
 		
@@ -57,19 +62,20 @@ public class ProductoController {
 			resultado.add(fila);
 		}
 
-		con.close();		
+		con.close();
 		
 		return resultado;
 	}
 
     public void guardar(Map<String, String> producto) throws SQLException {
     	Connection con = new ConnectionFactory().recuperaConexion();
-    	Statement statement = con.createStatement();
+    	PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO(NOMBRE, DESCRIPCION, CANTIDAD) "
+    			+ " VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
+    	statement.setString(1, producto.get("NOMBRE"));
+    	statement.setString(2, producto.get("DESCRIPCION"));
+    	statement.setInt(3, Integer.valueOf(producto.get("CANTIDAD")));
     	
-    	statement.execute("INSERT INTO PRODUCTO(NOMBRE, DESCRIPCION, CANTIDAD) "
-    			+ " VALUES('"+ producto.get("NOMBRE")+"', '"
-    			+ producto.get("DESCRIPCION")+"',"
-    			+ producto.get("CANTIDAD")+")", Statement.RETURN_GENERATED_KEYS);
+    	statement.execute();
     			
     	ResultSet resulSet = statement.getGeneratedKeys();
     	
@@ -79,6 +85,7 @@ public class ProductoController {
     						"Fue insertado el producto de ID %d",
     						resulSet.getInt(1)));
     	}
+    	con.close();
 	}
     
 }
