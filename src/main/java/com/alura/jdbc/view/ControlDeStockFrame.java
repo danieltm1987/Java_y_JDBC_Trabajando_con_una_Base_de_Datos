@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Optional;
 
-import javax.management.RuntimeErrorException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -282,7 +281,7 @@ public class ControlDeStockFrame extends JFrame {
 			throw new RuntimeException(e);
 		}
 
-        JOptionPane.showMessageDialog(this, "Registrado con éxito!");
+        //JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 
         this.limpiarFormulario();
     }

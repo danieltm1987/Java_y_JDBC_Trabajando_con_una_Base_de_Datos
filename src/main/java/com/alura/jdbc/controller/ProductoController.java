@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+import javax.swing.JOptionPane;
+
 import com.alura.jdbc.factory.ConnectionFactory;
 
 public class ProductoController {
@@ -73,37 +76,60 @@ public class ProductoController {
     	Integer cantidad = Integer.valueOf(producto.get("CANTIDAD"));
     	Integer maximoCantidad = 50;
     	
-    	Connection con = new ConnectionFactory().recuperaConexion();
+    	ConnectionFactory factory = new ConnectionFactory();
+    	Connection con = factory.recuperaConexion();
+    	con.setAutoCommit(false);
+    	
     	PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO(NOMBRE, DESCRIPCION, CANTIDAD) "
     			+ " VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
-    	do {
-    		int cantidadParaGuadar = Math.min(cantidad, maximoCantidad);
-    				
-    		ejecutaRegistros(nombre, descripcion, cantidadParaGuadar, statement);
-    		
-    		cantidad-=maximoCantidad;
-    		
-    	}while(cantidad>0);
     	
+    	try {
+			do {
+				int cantidadParaGuadar = Math.min(cantidad, maximoCantidad);
+						
+				ejecutaRegistros(nombre, descripcion, cantidadParaGuadar, statement);
+				
+				cantidad-=maximoCantidad;
+				
+			}while(cantidad>0);
+			con.commit();
+			JOptionPane.showMessageDialog(null, "Registrado con éxito!");
+		} catch (Exception e) {			
+			con.rollback();
+			JOptionPane.showMessageDialog(null, "Error durante la transaccion Guardar\n Cantidad debe ser mayor a 50!");
+		}
+    	
+    	statement.close();
     	con.close();
 	}
 
 	private void ejecutaRegistros(String nombre, String descripcion, Integer cantidad,
 			PreparedStatement statement) throws SQLException {
+		
+		if(cantidad < 50) {
+			throw new RuntimeException("Ocurrio un error");			
+		}
+		
 		statement.setString(1,nombre );
     	statement.setString(2, descripcion);
     	statement.setInt(3, cantidad);
     	
     	statement.execute();
-    			
-    	ResultSet resulSet = statement.getGeneratedKeys();
     	
-    	while(resulSet.next()) {
-    		System.out.println(
-    				String.format(
-    						"Fue insertado el producto de ID %d",
-    						resulSet.getInt(1)));
+    	// Try con recursos version 7 de JAVA
+    	try(final ResultSet resulSet = statement.getGeneratedKeys();){
+    		while(resulSet.next()) {
+        		System.out.println(
+        				String.format(
+        						"Fue insertado el producto de ID %d",
+        						resulSet.getInt(1)));
+        	}
     	}
+    			
+    	
+    	
+    	
+    	
     	
 	}
     
