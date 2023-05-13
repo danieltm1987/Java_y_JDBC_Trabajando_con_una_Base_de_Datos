@@ -1,5 +1,6 @@
 package com.alura.jdbc.view;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -13,6 +14,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
@@ -29,6 +31,7 @@ public class ControlDeStockFrame extends JFrame {
     private JComboBox<Object> comboCategoria;
     private JButton botonGuardar, botonModificar, botonLimpiar, botonEliminar, botonReporte;
     private JTable tabla;
+    private JScrollPane panelScroll;
     private DefaultTableModel modelo;
     private ProductoController productoController;
     private CategoriaController categoriaController;
@@ -40,27 +43,36 @@ public class ControlDeStockFrame extends JFrame {
         this.productoController = new ProductoController();
 
         Container container = getContentPane();
-        setLayout(null);
+        getContentPane().setLayout(null);
 
         configurarCamposDelFormulario(container);
 
         configurarTablaDeContenido(container);
 
-        configurarAccionesDelFormulario();
+        configurarAccionesDelFormulario();        
+
     }
 
     private void configurarTablaDeContenido(Container container) {
-        tabla = new JTable();
-
-        modelo = (DefaultTableModel) tabla.getModel();
+    	
+    	String[] titulos = {"Identificador del Producto","Nombre del Producto","Descripción del Producto","Cantidad del producto"};
+    	tabla = new JTable();    	
+        modelo = new DefaultTableModel(null, titulos);        
+        
+        tabla.setModel(modelo);        
+        panelScroll = new JScrollPane(tabla, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        
+        /*
         modelo.addColumn("Identificador del Producto");
         modelo.addColumn("Nombre del Producto");
         modelo.addColumn("Descripción del Producto");
         modelo.addColumn("Cantidad del producto");
+        */               
 
         cargarTabla();
-
-        tabla.setBounds(10, 205, 760, 280);
+        
+        panelScroll.setBounds(10, 205, 760, 280);        
+        //tabla.setBounds(10, 205, 760, 280);
 
         botonEliminar = new JButton("Eliminar");
         botonModificar = new JButton("Modificar");
@@ -69,14 +81,16 @@ public class ControlDeStockFrame extends JFrame {
         botonModificar.setBounds(100, 500, 80, 20);
         botonReporte.setBounds(190, 500, 80, 20);
 
-        container.add(tabla);
+        container.add(panelScroll);
+        //container.add(tabla);
         container.add(botonEliminar);
         container.add(botonModificar);
         container.add(botonReporte);
 
         setSize(800, 600);
         setVisible(true);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null);        
+        
     }
 
     private void configurarCamposDelFormulario(Container container) {
@@ -236,6 +250,7 @@ public class ControlDeStockFrame extends JFrame {
     		var productos = this.productoController.listar();
     		
     		try {
+    			//modelo.addRow(new Object[]{"ID","NOMBRE","DESCRIPCION","CANTIDAD"});
     			productos.forEach(producto -> modelo.addRow(new Object[] { 
     					producto.get("ID"),
     					producto.get("NOMBRE"),
