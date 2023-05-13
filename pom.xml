@@ -14,6 +14,17 @@
 		 <artifactId>mysql-connector-java</artifactId>
 		 <version>8.0.32</version> 
 	  </dependency>
+	  
+	  <dependency>
+		  <groupId>com.mchange</groupId>
+		  <artifactId>c3p0</artifactId>
+		  <version>0.9.5.5</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.mchange</groupId>
+		  <artifactId>mchange-commons-scala_2.10</artifactId>
+		  <version>0.4.16</version>
+	  </dependency>	  
   </dependencies>
   <build>
 	  <plugins>
