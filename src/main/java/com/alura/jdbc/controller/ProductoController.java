@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import com.alura.jdbc.factory.ConnectionFactory;
+import com.alura.jdbc.modelo.Producto;
 
 public class ProductoController {
 
@@ -87,11 +88,12 @@ public class ProductoController {
 		}
 	}
 
-	public void guardar(Map<String, String> producto) throws SQLException {
-		String nombre = producto.get("NOMBRE");
-		String descripcion = producto.get("DESCRIPCION");
-		Integer cantidad = Integer.valueOf(producto.get("CANTIDAD"));
-		Integer maximoCantidad = 50;
+	public void guardar(Producto producto) throws SQLException {
+		var nombre = producto.getNombre();
+		var descripcion = producto.getDescripcion();
+		var cantidad = producto.getCantidad();
+
+		//final var maximoCantidad = 50;
 
 		ConnectionFactory factory = new ConnectionFactory();
 		final Connection con = factory.recuperaConexion();
@@ -104,14 +106,13 @@ public class ProductoController {
 					Statement.RETURN_GENERATED_KEYS);
 
 			try(statement) {
-				do {
-					int cantidadParaGuadar = Math.min(cantidad, maximoCantidad);
+				//do {
+				//	int cantidadParaGuadar = Math.min(cantidad, maximoCantidad);
 
-					ejecutaRegistros(nombre, descripcion, cantidadParaGuadar, statement);
+					ejecutaRegistros(producto, statement);
 
-					cantidad -= maximoCantidad;
-
-				} while (cantidad > 0);
+				//	cantidad -= maximoCantidad;
+				//} while (cantidad > 0);
 				con.commit();
 				JOptionPane.showMessageDialog(null, "Registrado con éxito!");
 			} catch (Exception e) {
@@ -122,16 +123,16 @@ public class ProductoController {
 		}
 	}
 
-	private void ejecutaRegistros(String nombre, String descripcion, Integer cantidad, PreparedStatement statement)
+	private void ejecutaRegistros(Producto producto, PreparedStatement statement)
 			throws SQLException {
 
 		/*if (cantidad < 50) {
 			throw new RuntimeException("Ocurrio un error");
 		}*/
 
-		statement.setString(1, nombre);
-		statement.setString(2, descripcion);
-		statement.setInt(3, cantidad);
+		statement.setString(1, producto.getNombre() );
+		statement.setString(2, producto.getDescripcion() );
+		statement.setInt(3,producto.getCantidad());
 
 		statement.execute();
 
@@ -149,7 +150,8 @@ public class ProductoController {
 
 		try (resulSet) {
 			while (resulSet.next()) {
-				System.out.println(String.format("Fue insertado el producto de ID %d", resulSet.getInt(1)));
+				producto.setId(resulSet.getInt(1));
+				System.out.println(String.format("Fue insertado el producto %s", producto));
 			}
 		}
 
