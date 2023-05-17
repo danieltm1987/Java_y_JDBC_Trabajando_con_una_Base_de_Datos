@@ -133,4 +133,49 @@ public class ProductoDAO {
 		}
 	}
 
+	public int eliminar(Integer id) {
+		try{
+			
+			final PreparedStatement statement = 
+					con.prepareStatement("DELETE FROM PRODUCTO WHERE ID = ?");
+
+			try (statement) {
+				statement.setInt(1, id);
+				statement.execute();
+				
+				int updatecount = statement.getUpdateCount();
+				
+				return updatecount;
+			}
+		}catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public int modificar(Producto producto) {
+		try {
+			final PreparedStatement statement = con.prepareStatement(
+					"UPDATE PRODUCTO SET" 
+							+ " NOMBRE = ?, "
+							+ "DESCRIPCION = ?,"
+							+ " CANTIDAD = ? "
+							+ "WHERE ID = ?;");
+
+			try (statement) {
+				statement.setString(1,producto.getNombre());
+				statement.setString(2,producto.getDescripcion() );
+				statement.setInt(3, producto.getCantidad());
+				statement.setInt(4, producto.getId());
+				statement.execute();
+				
+				int updateCount = statement.getUpdateCount();
+				
+				return updateCount;
+			}
+		}catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+
 }

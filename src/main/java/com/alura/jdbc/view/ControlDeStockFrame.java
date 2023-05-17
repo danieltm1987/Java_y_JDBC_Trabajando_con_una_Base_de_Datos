@@ -204,15 +204,11 @@ public class ControlDeStockFrame extends JFrame {
                     String descripcion = (String) modelo.getValueAt(tabla.getSelectedRow(), 2);
                     Integer cantidad = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 3).toString());
                     
-                    int filasModificadas;
-
-                    try {
+                                        
+                    var producto = new Producto(id, nombre, descripcion, cantidad);
                     	
-                    	filasModificadas = this.productoController.modificar(nombre, descripcion, id, cantidad);
-						
-					} catch (SQLException e) {
-						throw new RuntimeException(e);
-					}
+                    var filasModificadas = this.productoController.modificar(producto);						
+					
                     
                     JOptionPane.showMessageDialog(this, String.format("%d item modificado con éxito!", filasModificadas));
                     
@@ -225,24 +221,20 @@ public class ControlDeStockFrame extends JFrame {
             return;
         }
 
-        Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
+        Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(),
+        		tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                     Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
                     Integer cantidad = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 3).toString());
                     
                     JOptionPane.showMessageDialog(null, "cantidad :"+cantidad);
                     
-                    int cantidadEliminada;
-
-                    try {
-                    	cantidadEliminada = this.productoController.eliminar(id);
-					} catch (SQLException e) {
-						throw new RuntimeException(e);
-					}
+                    var cantidadEliminada = this.productoController.eliminar(id);
+					
 
                     modelo.removeRow(tabla.getSelectedRow());
 
-                    JOptionPane.showMessageDialog(this, "Item eliminado con éxito!");
+                    JOptionPane.showMessageDialog(this, String.format("%d Item eliminado con éxito!", cantidadEliminada));
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
