@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alura.jdbc.modelo.Categoria;
+import com.alura.jdbc.modelo.Producto;
 import com.mysql.cj.protocol.Resultset;
 
 public class CategoriaDAO {
@@ -36,6 +37,49 @@ public class CategoriaDAO {
 								resultSet.getString("NOMBRE"));
 						
 						resultado.add(categoria);						
+					}
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return resultado;
+	}
+
+	public List<Categoria> listarConProductos() {
+List<Categoria> resultado = new ArrayList<>();
+		
+		try {
+			var querySelect = "SELECT C.ID, C.NOMBRE, P.ID, P.NOMBRE, P.CANTIDAD "
+					+ "FROM CATEGORIA C "
+					+ "INNER JOIN PRODUCTO P ON C.ID = P.CATEGORIA_ID";
+			System.out.println(querySelect);
+			
+			final PreparedStatement statement = con.prepareStatement(querySelect);
+			
+			try(statement) {
+				final ResultSet resultSet = statement.executeQuery();
+				
+				try(resultSet) {
+					while(resultSet.next()) {
+						int categoriaId = resultSet.getInt("ID"); 
+						String categoriaNombre = resultSet.getString("NOMBRE");
+						
+						var categoria = resultado
+								.stream()
+								.filter(cat -> cat.getId().equals(categoriaId))
+								.findAny().orElseGet(() -> {
+									Categoria cat = new Categoria(categoriaId, categoriaNombre);
+									resultado.add(cat);
+									return cat;
+								});
+						Producto producto = new Producto(
+								resultSet.getInt("P.ID"),
+								resultSet.getString("P.NOMBRE"),
+								resultSet.getInt("P.CANTIDAD"));
+						
+						categoria.agregar(producto);
 					}
 				}
 			}
