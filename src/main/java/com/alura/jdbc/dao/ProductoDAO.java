@@ -98,10 +98,7 @@ public class ProductoDAO {
 	public List<Producto> listar() {
 		List<Producto> resultado = new ArrayList<>();
 
-		ConnectionFactory factory = new ConnectionFactory();
-		final Connection con = factory.recuperaConexion();
-
-		try (con) {			
+		try (con) {
 			final PreparedStatement statement = con
 					.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO");
 			
@@ -112,26 +109,18 @@ public class ProductoDAO {
 				
 				try(resultSet){
 					while (resultSet.next()) {
-						Producto fila = new Producto(resultSet.getInt("ID"), 
-											resultSet.getString("NOMBRE"),
-											resultSet.getString("DESCRIPCION"),
-											resultSet.getInt("CANTIDAD"));
-						/*
-						Map<String, String> fila = new HashMap<>();
-						fila.put("ID", String.valueOf(resultSet.getInt("ID")));
-						fila.put("NOMBRE", resultSet.getString("NOMBRE"));
-						fila.put("DESCRIPCION", resultSet.getString("DESCRIPCION"));
-						fila.put("CANTIDAD", String.valueOf(resultSet.getInt("CANTIDAD")));
-						*/
-	
-						resultado.add(fila);
+						resultado.add(new Producto(
+								resultSet.getInt("ID"), 
+								resultSet.getString("NOMBRE"),
+								resultSet.getString("DESCRIPCION"),
+								resultSet.getInt("CANTIDAD")));						
 					}
 				}				
-			}
-			return resultado;
+			}			
 		}catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+		return resultado;
 	}
 
 	public int eliminar(Integer id) {
@@ -176,6 +165,38 @@ public class ProductoDAO {
 		}catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public List<Producto> listar(Integer categoriaId) {
+		List<Producto> resultado = new ArrayList<>();
+
+		try {
+			var querySelect = "SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO WHERE CATEGORIA_ID = ?";
+			System.out.println(querySelect);
+
+			final PreparedStatement statement = con
+					.prepareStatement(querySelect);
+			
+			try (statement) {				
+				statement.setInt(1, categoriaId);				
+				statement.execute();
+
+				final ResultSet resultSet = statement.getResultSet();
+				
+				try(resultSet){
+					while (resultSet.next()) {
+						resultado.add(new Producto(
+								resultSet.getInt("ID"), 
+								resultSet.getString("NOMBRE"),
+								resultSet.getString("DESCRIPCION"),
+								resultSet.getInt("CANTIDAD")));
+					}
+				}
+			}
+		}catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		return resultado;
 	}
 	
 
